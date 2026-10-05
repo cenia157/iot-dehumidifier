@@ -1835,9 +1835,9 @@ Raspberry Pi Pico 2 WH에는 LM2596HV Buck Converter를 이용하여 12V를 5V�
 | 주 전원 | AC/DC 어댑터 | AC 100~110V → DC 12V / 10A급 | 1 | 시스템 전체 DC 전원 공급 |
 | 전원 입력 | DC 전원 커넥터 | DC 12V / 시스템 최대전류 대응 | 1 | AC/DC 어댑터와 본체 연결 |
 | 전원 분배 | HM03-04D | DC ≤72V / 입력 ≤15A / 채널당 ≤8A | 1 | 12V 전원 4채널 분배 |
-| 전압 변환 | LM2596HV Buck Converter | DC 5~50V 입력 / 가변 출력 / 연속 2.2A급 | 1 | 12V → 5V 변환 |
+| 전압 변환 | LM2596HV Buck Converter | DC 5~50V 입력 / 가변 출력 | 1 | 12V → 5V 변환 |
 | 전력 제어 | MOSFET Trigger Module | DC 4~60V / 연속 10A / High·Low Trigger / PWM | 1 | 펠티어 전원 제어 |
-| 펠티어 | TEC1-12706 | 12V / 최대 약 6A급 | 1 | 제습용 냉각 |
+| 펠티어 | TEC1-12706 | 12V 계통 / 6A급 | 1 | 제습용 냉각 |
 | 제어부 | Raspberry Pi Pico 2 WH | VSYS 입력 / 3.3V GPIO | 1 | 시스템 전체 제어 |
 
 AC/DC 어댑터는 시스템 전체 부하를 고려하여 DC 12V / 10A급을 기준으로 선정한다.
@@ -1920,7 +1920,8 @@ TEC1-12706은 시스템에서 가장 큰 전류를 소비하는 부하이므로 
 - 120mm 4-Pin PWM 팬을 사용한다.
 - 외부 공기를 펠티어 냉각면의 응축부로 유입하는 용도로 사용한다.
 - 팬의 주 전원은 HM03-04D에서 직접 공급한다.
-- Raspberry Pi Pico 2 WH에서 PWM 제어 신호를 출력하여 회전 속도를 제어한다.
+- Raspberry Pi Pico 2 WH의 PWM 출력 신호를 이용하여 팬의 회전 속도를 제어한다.
+- Pico와 팬 사이의 전기적 인터페이스는 팬의 PWM 입력 사양에 맞는 구동 회로를 적용한다.
 - TACH 신호를 사용할 경우 팬의 회전 상태 확인에 사용한다.
 
 ##### 방열 팬
@@ -1928,7 +1929,8 @@ TEC1-12706은 시스템에서 가장 큰 전류를 소비하는 부하이므로 
 - HM03-04D의 CH3에서 12V와 GND를 공급한다.
 - 펠티어 발열면의 CPU 공랭 쿨러에 장착된 4-Pin PWM 팬을 사용한다.
 - 팬의 주 전원은 HM03-04D에서 직접 공급한다.
-- Raspberry Pi Pico 2 WH에서 PWM 제어 신호를 출력하여 방열부 온도에 따라 회전 속도를 조절한다.
+- Raspberry Pi Pico 2 WH의 PWM 출력 신호를 이용하여 방열부 온도에 따라 회전 속도를 조절한다.
+- Pico와 팬 사이의 전기적 인터페이스는 팬의 PWM 입력 사양에 맞는 구동 회로를 적용한다.
 - TACH 신호를 사용할 경우 팬의 회전 상태 확인에 사용한다.
 - 펠티어 정지 후에도 방열부에 잔열이 존재하는 경우 일정 조건까지 방열 팬을 계속 동작시킬 수 있도록 한다.
 
@@ -1968,7 +1970,7 @@ Raspberry Pi Pico 2 WH
             ├─ 74HC595 × 1
             │     └─ 2자리 7-Segment A~G
             │
-            ├─ 7-Segment DIG1/DIG2 제어
+            ├─ 7-Segment DIG1/DIG2
             ├─ 제습 LED
             ├─ 만수 LED
             ├─ Error LED
@@ -1982,9 +1984,10 @@ Raspberry Pi Pico 2 WH
 - Pico의 3V3(OUT)을 이용하여 3.3V 동작이 필요한 주변 회로에 전원을 공급한다.
 - 프로토타입 단계에서는 브레드보드의 전원 레일을 3.3V BUS와 GND BUS로 사용하여 각 저전압 회로에 병렬 분배한다.
 - 74HC595 1개는 2자리 7-Segment의 세그먼트 출력 확장을 위해 사용한다.
-- 74HC595의 출력은 7-Segment의 A~G 세그먼트 제어에 사용한다.
-- 7-Segment의 DIG1 및 DIG2 자리 선택 신호는 Raspberry Pi Pico 2 WH의 GPIO에서 직접 제어하며, 자리 선택용 트랜지스터를 통해 구동한다.
-- 제습 LED, 만수 LED, Error LED 및 Wi-Fi RGB LED는 Raspberry Pi Pico 2 WH의 GPIO에서 직접 제어한다.
+- 74HC595의 출력 중 7개는 7-Segment의 A~G 세그먼트 제어에 사용하며, 나머지 1개 출력은 예비 출력으로 둔다.
+- 7-Segment의 DIG1 및 DIG2 자리 선택 신호는 Raspberry Pi Pico 2 WH의 GPIO를 이용하여 제어하며, 자리 선택용 트랜지스터를 통해 구동한다.
+- 제습 LED, 만수 LED, Error LED 및 Wi-Fi RGB LED는 Raspberry Pi Pico 2 WH의 GPIO 신호를 이용하여 제어한다.
+- 각 LED의 전류 제한 저항 및 필요 시 적용하는 구동 회로는 상세설계에서 확정한다.
 - 3.3V 계통의 최대 소비전류는 7-Segment 및 각 상태 LED의 전류 제한 저항과 구동 회로가 확정된 후 상세설계 단계에서 검증한다.
 - 최종 PCB에서는 PCB의 3.3V 및 GND 전원 패턴을 이용하여 각 회로에 전원을 분배한다.
 
@@ -2109,31 +2112,23 @@ HM03-04D에 탑재된 메인 스위치를 이용하여 시스템 전체의 12V �
                 DC 전원 커넥터
                          │
                          ▼
-┌────────────────────────────────────────────┐
-│                  HM03-04D                  │
-│             12V Power Distributor          │
-│                                            │
-│  CH1 ── MOSFET Trigger ── TEC1-12706      │
-│                                            │
-│  CH2 ─────────────────── 120mm 흡기 FAN   │
-│                              │             │
-│                           PWM/TACH         │
-│                              ↕             │
-│                             Pico           │
-│                                            │
-│  CH3 ─────────────────── CPU Cooler FAN   │
-│                              │             │
-│                           PWM/TACH         │
-│                              ↕             │
-│                             Pico           │
-│                                            │
-│  CH4 ── LM2596HV                          │
-│              │                             │
-│             5V                             │
-└──────────────┼─────────────────────────────┘
-               │
-               ▼
-       Raspberry Pi Pico 2 WH
+┌──────────────────────────────────────────────┐
+│                  HM03-04D                    │
+│             12V Power Distributor            │
+│                                              │
+│  CH1 ── MOSFET Trigger ── TEC1-12706        │
+│                                              │
+│  CH2 ─────────────────── 120mm 흡기 FAN ────┼── PWM/TACH ──┐
+│                                              │              │
+│  CH3 ─────────────────── CPU Cooler FAN ─────┼── PWM/TACH ──┤
+│                                              │              │
+│  CH4 ── LM2596HV                             │              │
+│              │                               │              │
+│             5V                               │              │
+└──────────────┼───────────────────────────────┘              │
+               │                                              │
+               ▼                                              │
+       Raspberry Pi Pico 2 WH ◀───────────────────────────────┘
                │
           3V3(OUT) / GND
                │
@@ -2141,28 +2136,32 @@ HM03-04D에 탑재된 메인 스위치를 이용하여 시스템 전체의 12V �
         3.3V / GND BUS
       (Prototype: Breadboard)
                │
-       ┌───────┼────────────┐
-       │       │            │
-       ▼       ▼            ▼
-     센서부   입력부      상태 표시부
-                            │
-             ┌──────────────┼──────────────┐
-             │              │              │
-             ▼              ▼              ▼
-          74HC595        DIG1/DIG2       상태 LED
-             │           (Pico GPIO)     (Pico GPIO)
-             ▼
-       2자리 7-Segment
-          A~G 제어
+       ┌───────┼────────────────────┐
+       │       │                    │
+       ▼       ▼                    ▼
+     센서부   입력부              상태 표시부
+                                    │
+                  ┌─────────────────┼─────────────────┐
+                  │                 │                 │
+                  ▼                 ▼                 ▼
+               74HC595          DIG1/DIG2          상태 LED
+                  │            (Pico GPIO)        (Pico GPIO)
+                  ▼
+          2자리 7-Segment
+             A~G 제어
 ~~~
 
 12V 계통은 HM03-04D를 이용하여 각 부하에 병렬 분배하고, 각 채널에서 +12V와 GND를 함께 공급한다.
 
-TEC1-12706은 MOSFET Trigger Module을 통해 전력을 제어하며, 4-Pin PWM 팬은 12V 주 전원과 PWM 제어 신호를 분리하여 구성한다.
+TEC1-12706은 MOSFET Trigger Module을 통해 전력을 제어한다.
+
+흡기 팬과 방열 팬은 HM03-04D에서 12V 주 전원을 공급받으며, PWM 및 TACH 신호는 Raspberry Pi Pico 2 WH와 연결한다.
 
 Raspberry Pi Pico 2 WH는 LM2596HV에서 생성한 5V 전원을 VSYS를 통해 공급받으며, Pico의 3V3(OUT)을 통해 센서부, 입력부 및 상태 표시부에 필요한 3.3V 전원을 공급한다.
 
-상태 표시부의 2자리 7-Segment A~G 출력은 74HC595 1개를 이용하여 제어한다. 7-Segment의 DIG1/DIG2 자리 선택과 제습 LED, 만수 LED, Error LED 및 Wi-Fi RGB LED는 Raspberry Pi Pico 2 WH의 GPIO에서 직접 제어한다.
+상태 표시부의 2자리 7-Segment A~G 출력은 74HC595 1개를 이용하여 제어한다. 74HC595의 나머지 1개 출력은 예비 출력으로 둔다.
+
+7-Segment의 DIG1/DIG2 자리 선택과 제습 LED, 만수 LED, Error LED 및 Wi-Fi RGB LED는 Raspberry Pi Pico 2 WH의 GPIO 신호를 이용하여 제어한다.
 
 각 채널의 최종 퓨즈 정격, 전원 커넥터 규격, 전선 굵기, MOSFET 상세 단자 연결, 4-Pin PWM 팬 인터페이스, 74HC595 구동 회로 및 GPIO 할당은 하드웨어 상세설계에서 확정한다.
 
